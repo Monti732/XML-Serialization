@@ -1,6 +1,7 @@
 ﻿namespace XML_Serialization;
 
 using System.Xml.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 [Serializable]
 public class TextFile {
@@ -13,8 +14,26 @@ public class TextFile {
     FilePath = filePath;
     Content = content;
   }
+  
+ /* BinaryFormatter is obsolete(Press F), it does not work without comments 
+  public void SaveToBinary(string path)
+  {
+    using (FileStream fs = new FileStream(path, FileMode.Create))
+    {
+      BinaryFormatter formatter = new BinaryFormatter();
+      formatter.Serialize(fs, this);
+    }
+  }
 
-  // Сохранение в XML
+  public static TextFile LoadFromBinary(string path)
+  {
+    using (FileStream fs = new FileStream(path, FileMode.Open))
+    {
+      BinaryFormatter formatter = new BinaryFormatter();
+      return (TextFile)formatter.Deserialize(fs);
+    }
+  }
+*/
   public void SaveToXml(string path) {
     XmlSerializer serializer = new XmlSerializer(typeof(TextFile));
     using (FileStream fileStream = new FileStream(path, FileMode.Create)) {
@@ -22,7 +41,6 @@ public class TextFile {
     }
   }
 
-  // Загрузка из XML
   public static TextFile LoadFromXml(string path) {
     XmlSerializer serializer = new XmlSerializer(typeof(TextFile));
     using (FileStream fs = new FileStream(path, FileMode.Open)) {
