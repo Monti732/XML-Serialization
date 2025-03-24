@@ -1,2 +1,7 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿namespace XML_Serialization;
+
+class Program {
+  static void Main() {
+    
+  }
+}
