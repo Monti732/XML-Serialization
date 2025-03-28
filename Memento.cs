@@ -1,6 +1,9 @@
 ﻿namespace XML_Serialization;
 
 public class Memento {
-  public string Content { get; set; }
-  public Memento(string content) => Content = content;
+  public string Content { get; }
+
+  public Memento(string content) {
+    Content = content;
+  }
 }
