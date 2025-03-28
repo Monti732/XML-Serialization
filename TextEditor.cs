@@ -1,16 +1,15 @@
 ﻿namespace XML_Serialization;
 
-public class TextEditor {
+public class TextEditor : IOriginator {
   private List<string> _lines;
-  private Stack<Memento> _history;
   private int _cursorX = 0, _cursorY = 0;
   private string _filePath;
+  private CareTaker _careTaker;
 
   public TextEditor(string filePath) {
     _filePath = filePath;
     _lines = new List<string>(File.Exists(filePath) ? File.ReadAllLines(filePath) : new string[] { "" });
-    _history = new Stack<Memento>();
-    SaveState();
+    _careTaker = new CareTaker();
   }
 
   public void Run() {
@@ -21,26 +20,17 @@ public class TextEditor {
     while (true) {
       key = Console.ReadKey(true);
 
-      if (key.Key == ConsoleKey.Escape) break;
-      //ctrl+s or ctrl+shift+s has a conflict with win console, so it doesnt work(cool)
-      if (key.Key == ConsoleKey.D && key.Modifiers == ConsoleModifiers.Control) { 
-        SaveToFile();
-        continue;
-      }
-
       switch (key.Key) {
       case ConsoleKey.UpArrow: MoveCursor(0, -1); break;
       case ConsoleKey.DownArrow: MoveCursor(0, 1); break;
       case ConsoleKey.LeftArrow: MoveCursor(-1, 0); break;
       case ConsoleKey.RightArrow: MoveCursor(1, 0); break;
       case ConsoleKey.Backspace: DeleteCharacter(); break;
-      case ConsoleKey.Delete: DeleteCharacter(true); break;
       case ConsoleKey.Enter: InsertNewLine(); break;
-      /*doesn't work in rider console(wtf?), but in external works
-     Cannot Undo
-     Following files affected by this action have been already changed*/
       case ConsoleKey.Z when key.Modifiers == ConsoleModifiers.Control: Undo(); break;
       case ConsoleKey.Q when key.Modifiers == ConsoleModifiers.Control: return;
+      //CTRL+S or even CTRL+SHIFT+S has a conflict with external console, so I replaced S with D
+      case ConsoleKey.D when key.Modifiers == ConsoleModifiers.Control: SaveToFile(); continue;
       default: InsertCharacter(key.KeyChar); break;
       }
     }
@@ -93,15 +83,22 @@ public class TextEditor {
   }
 
   private void Undo() {
-    if (_history.Count > 1) {
-      _history.Pop();
-      _lines = new List<string>(_history.Peek().Content.Split('\n'));
-      DrawText();
-    }
+    _careTaker.RestoreState(this);
+    DrawText();
   }
 
   private void SaveState() {
-    _history.Push(new Memento(string.Join("\n", _lines)));
+    _careTaker.SaveState(this);
+  }
+//GetMemento() and SetMemento() are useless in this context, but if I can do it, then why not
+  public object GetMemento() {
+    return new Memento(string.Join("\n", _lines));
+  }
+
+  public void SetMemento(object memento) {
+    if (memento is Memento state) {
+      _lines = new List<string>(state.Content.Split("\n"));
+    }
   }
 
   private void SaveToFile() {
