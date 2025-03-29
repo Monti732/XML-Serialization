@@ -88,7 +88,7 @@ public class TextEditor : CareTaker, IOriginator {
   private void SaveState() {
     SaveState(this);
   }
-  //GetMemento() and SetMemento() are useless in this context, but if I can do it, then why not
+  //GetMemento() and SetMemento() look useless, but they are needed here
   public object GetMemento() {
     return new Memento(string.Join("\n", _lines));
   }
