@@ -1,15 +1,13 @@
 ﻿namespace XML_Serialization;
 
-public class TextEditor : IOriginator {
+public class TextEditor : CareTaker, IOriginator {
   private List<string> _lines;
   private int _cursorX = 0, _cursorY = 0;
   private string _filePath;
-  private CareTaker _careTaker;
 
   public TextEditor(string filePath) {
     _filePath = filePath;
     _lines = new List<string>(File.Exists(filePath) ? File.ReadAllLines(filePath) : new string[] { "" });
-    _careTaker = new CareTaker();
   }
 
   public void Run() {
@@ -83,14 +81,14 @@ public class TextEditor : IOriginator {
   }
 
   private void Undo() {
-    _careTaker.RestoreState(this);
+    RestoreState(this);
     DrawText();
   }
 
   private void SaveState() {
-    _careTaker.SaveState(this);
+    SaveState(this);
   }
-//GetMemento() and SetMemento() are useless in this context, but if I can do it, then why not
+  //GetMemento() and SetMemento() look useless, but they are needed here
   public object GetMemento() {
     return new Memento(string.Join("\n", _lines));
   }
@@ -100,7 +98,7 @@ public class TextEditor : IOriginator {
       _lines = new List<string>(state.Content.Split("\n"));
     }
   }
-
+  
   private void SaveToFile() {
     File.WriteAllLines(_filePath, _lines);
     Console.SetCursorPosition(0, _lines.Count);
